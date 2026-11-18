@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Free Tool Wala - Free online PDF tools to merge, split, compress, convert and organize PDF files.">
+<title>PDF Tools - Free Tool Wala</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-icon">F</span> FREE TOOL WALA</a><nav><a href="#tools">All Tools</a><a href="#about">About</a></nav><button id="themeBtn" class="theme-btn" aria-label="Toggle theme">☾</button></header>
+<main>
+<section class="hero"><div class="hero-copy"><span class="eyebrow">✦ FREE ONLINE PDF UTILITIES</span><h1>Your PDF work,<br><span>made simple.</span></h1><p>PDF को मर्ज, स्प्लिट, कन्वर्ट और एडिट करें — सीधे अपने ब्राउज़र में।</p><a class="primary-link" href="#tools">Explore PDF Tools ↓</a><small>फाइलें आपके ब्राउज़र में प्रोसेस होती हैं; सर्वर पर अपलोड नहीं होतीं।</small></div><div class="hero-art"><div class="paper"><b>PDF</b><i>▤</i><span>✦</span></div><div class="float f1">＋ Merge</div><div class="float f2">⇩ Download</div><div class="float f3">✧ Convert</div></div></section>
+<section class="tool-section" id="tools"><div class="section-head"><div><span class="eyebrow">THE PDF TOOLKIT</span><h2>15 PDF Tools</h2><p>अपना टूल चुनें और काम शुरू करें।</p></div><input id="search" class="search" placeholder="🔎 Search tools..." aria-label="Search tools"></div><div id="toolGrid" class="tool-grid"></div></section>
+<section class="workspace" id="workspace" hidden><div class="work-head"><div><span class="eyebrow">FREE TOOL WALA / PDF</span><h2 id="toolTitle">Tool</h2><p id="toolDesc"></p></div><button id="backBtn" class="secondary">← सभी टूल</button></div><div class="work-card"><div id="toolForm"></div><div id="status" class="status" aria-live="polite"></div></div></section>
+<section class="about" id="about"><h2>Simple. Useful. Free.</h2><p>Free Tool Wala पर PDF के रोज़मर्रा के काम आसान बनाइए। संवेदनशील दस्तावेज़ों के साथ काम करते समय अपने डिवाइस की सुरक्षा का ध्यान रखें।</p></section>
+</main><footer>© <span id="year"></span> Free Tool Wala · Made for everyone</footer>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="script.js"></script>
+</body></html>

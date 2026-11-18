@@ -1,0 +1,52 @@
+/* Free Tool Wala PDF Toolkit. Libraries are loaded from public CDNs. */
+if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const tools=[
+["merge","PDF Merger","कई PDF फाइलों को एक PDF में जोड़ें","🧩"],["split","PDF Splitter","पेज रेंज के आधार पर अलग PDF बनाएँ","✂️"],["compress","PDF Compressor","PDF को दोबारा सेव करके आकार घटाने का प्रयास करें","📦"],["pdfjpg","PDF to JPG","PDF पेज को JPG इमेज में बदलें","🖼️"],["jpgpdf","JPG to PDF","एक या कई तस्वीरों से PDF बनाएँ","🌄"],["rotate","Rotate PDF","चुने हुए पेज घुमाएँ","🔄"],["extract","PDF Page Extractor","चुने हुए पेज अलग PDF में निकालें","📄"],["reorder","PDF Page Reorder","पेज का नया क्रम सेट करें","↕️"],["pdfword","PDF to Word","PDF का टेक्स्ट DOCX फाइल में निकालें","📝"],["wordpdf","Word to PDF","DOCX को PDF में बदलें (बेसिक टेक्स्ट लेआउट)","📃"],["text","PDF to Text","PDF से टेक्स्ट निकालकर TXT डाउनलोड करें","🔤"],["numbers","Add Page Numbers","हर पेज पर नंबर जोड़ें","🔢"],["watermark","Add Watermark","PDF पेज पर टेक्स्ट वॉटरमार्क लगाएँ","💧"],["meta","PDF Metadata Viewer","PDF का शीर्षक, लेखक और पेज देखें","ℹ️"],["images","PDF Image Extractor","हर पेज को JPG इमेज के रूप में निकालें","🏞️"]
+];
+const $=s=>document.querySelector(s), grid=$("#toolGrid"), workspace=$("#workspace"), form=$("#toolForm"), status=$("#status");
+$("#year").textContent=new Date().getFullYear();
+grid.innerHTML=tools.map(t=>`<button class="tool-card" data-id="${t[0]}"><span class="card-arrow">↗</span><div class="tool-icon">${t[3]}</div><h3>${t[1]}</h3><p>${t[2]}</p></button>`).join("");
+$("#search").addEventListener("input",e=>{const q=e.target.value.toLowerCase();document.querySelectorAll(".tool-card").forEach(c=>c.hidden=!c.innerText.toLowerCase().includes(q));});
+grid.addEventListener("click",e=>{const b=e.target.closest("[data-id]");if(b)openTool(b.dataset.id)});
+$("#backBtn").onclick=()=>{workspace.hidden=true;document.querySelector("#tools").scrollIntoView({behavior:"smooth"})};
+$("#themeBtn").onclick=()=>{document.body.classList.toggle("dark");$("#themeBtn").textContent=document.body.classList.contains("dark")?"☀":"☾"};
+function openTool(id){const t=tools.find(x=>x[0]===id);workspace.hidden=false;$("#toolTitle").textContent=t[1];$("#toolDesc").textContent=t[2];status.textContent="";status.className="status";form.innerHTML=ui(id);workspace.scrollIntoView({behavior:"smooth"});$("#run").onclick=()=>run(id).catch(err=>message(err.message||"કોઈ સમસ્યા આવી।",true));}
+function fileField(label,multiple=false,accept=".pdf"){return `<div class="field"><label>${label}</label><input id="files" type="file" accept="${accept}" ${multiple?"multiple":""}></div>`}
+function ui(id){let f=fileField("PDF ફाइल चुनें");switch(id){
+case"merge":return fileField("कम से कम 2 PDF चुनें",true)+go("Merge PDFs");
+case"split":case"extract":return f+field("पेज रेंज (उदाहरण: 1-3,5,8-10)","pages","text","1-3,5")+go(id==="split"?"Split PDF":"Extract Pages");
+case"compress":return f+`<div class="hint">यह टूल PDF को दोबारा सेव करेगा। इससे हर PDF का आकार कम होना निश्चित नहीं है।</div>`+go("Optimize PDF");
+case"pdfjpg":case"images":return f+field("इमेज क्वालिटी (0.2 से 1)","quality","number","0.85")+go("Convert pages to JPG");
+case"jpgpdf":return fileField("JPG / PNG तस्वीरें चुनें",true,"image/jpeg,image/png")+go("Create PDF");
+case"rotate":return f+field("पेज (खाली छोड़ें तो सभी)","pages","text","1,3-5")+`<div class="field"><label>घुमाने का कोण</label><select id="angle"><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></div>`+go("Rotate PDF");
+case"reorder":return f+field("नया पेज क्रम (उदाहरण: 3,1,2,4)","order","text","3,1,2,4")+go("Reorder Pages");
+case"pdfword":case"text":return f+go(id==="text"?"Extract Text":"Create DOCX");
+case"wordpdf":return fileField("DOCX फाइल चुनें",false,".docx")+`<div class="hint">DOCX से टेक्स्ट निकलेगा और साधारण PDF बनेगा। जटिल टेबल, चित्र और मूल फॉर्मेटिंग सुरक्षित नहीं रह सकती।</div>`+go("Convert to PDF");
+case"numbers":return f+field("शुरुआती नंबर","start","number","1")+go("Add Page Numbers");
+case"watermark":return f+field("वॉटरमार्क टेक्स्ट","watermark","text","CONFIDENTIAL")+go("Add Watermark");
+case"meta":return f+go("View PDF Information");
+default:return f+`<div class="hint">यह टूल हर PDF पेज को JPG इमेज में बदलकर डाउनलोड करेगा। यह PDF में मौजूद मूल embedded images को अलग-अलग नहीं निकालता।</div>`+go("Extract page images");
+}}
+function field(label,id,type="text",placeholder=""){return `<div class="field"><label>${label}</label><input id="${id}" type="${type}" placeholder="${placeholder}" ${type==="number"?'step="any"':''}></div>`}
+function go(label){return `<div class="actions"><button class="btn" id="run">${label}</button></div>`}
+function message(msg,error=false){status.textContent=msg;status.className="status "+(error?"error":"success")}
+function selected(){const f=$("#files")?.files;if(!f||!f.length)throw Error("पहले फाइल चुनें।");return [...f]}
+async function bytes(file){return new Uint8Array(await file.arrayBuffer())}
+function parsePages(s,total){if(!s.trim())return Array.from({length:total},(_,i)=>i);let out=[];for(const part of s.split(",")){let p=part.trim();if(p.includes("-")){let [a,b]=p.split("-").map(Number);if(!a||!b||a>b)throw Error("पेज रेंज सही लिखें।");for(let n=a;n<=b;n++)out.push(n-1)}else{let n=Number(p);if(!n)throw Error("पेज नंबर सही लिखें।");out.push(n-1)}}if(out.some(n=>n<0||n>=total))throw Error(`पेज नंबर 1 से ${total} के बीच होना चाहिए।`);return [...new Set(out)]}
+function download(data,name,type="application/pdf"){const blob=data instanceof Blob?data:new Blob([data],{type});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+async function loadPdf(file){return PDFLib.PDFDocument.load(await bytes(file))}
+async function renderPages(file,quality=.85){const doc=await pdfjsLib.getDocument({data:await bytes(file)}).promise;let imgs=[];for(let i=1;i<=doc.numPages;i++){const p=await doc.getPage(i),v=p.getViewport({scale:1.6}),c=document.createElement("canvas");c.width=v.width;c.height=v.height;await p.render({canvasContext:c.getContext("2d"),viewport:v}).promise;const blob=await new Promise(r=>c.toBlob(r,"image/jpeg",Math.min(1,Math.max(.2,quality))));imgs.push({blob,name:`page-${i}.jpg`})}return imgs}
+async function run(id){status.className="status";message("काम हो रहा है…");const fs=selected(),f=fs[0],{PDFDocument,StandardFonts,rgb,degrees}=PDFLib;
+if(id==="merge"){const out=await PDFDocument.create();for(const file of fs){const src=await loadPdf(file),pages=await out.copyPages(src,src.getPageIndices());pages.forEach(p=>out.addPage(p))}download(await out.save(),"merged.pdf");}
+else if(["split","extract"].includes(id)){const src=await loadPdf(f),idx=parsePages($("#pages").value,src.getPageCount()),out=await PDFDocument.create(),pages=await out.copyPages(src,idx);pages.forEach(p=>out.addPage(p));download(await out.save(),"selected-pages.pdf");}
+else if(id==="compress"){const src=await loadPdf(f);download(await src.save({useObjectStreams:true,addDefaultPage:false}),"optimized.pdf");}
+else if(id==="rotate"){const src=await loadPdf(f),idx=parsePages($("#pages").value,src.getPageCount()),angle=Number($("#angle").value);idx.forEach(i=>{const p=src.getPage(i);p.setRotation(degrees((p.getRotation().angle+angle)%360))});download(await src.save(),"rotated.pdf")}
+else if(id==="reorder"){const src=await loadPdf(f),order=parsePages($("#order").value,src.getPageCount());if(order.length!==src.getPageCount())throw Error("नए क्रम में हर पेज एक बार शामिल करें।");const out=await PDFDocument.create(),pages=await out.copyPages(src,order);pages.forEach(p=>out.addPage(p));download(await out.save(),"reordered.pdf")}
+else if(id==="jpgpdf"){const out=await PDFDocument.create();for(const file of fs){const b=await bytes(file),img=file.type==="image/png"?await out.embedPng(b):await out.embedJpg(b),p=out.addPage([img.width,img.height]);p.drawImage(img,{x:0,y:0,width:img.width,height:img.height})}download(await out.save(),"images.pdf")}
+else if(["pdfjpg","images"].includes(id)){const q=Number($("#quality").value||.85),imgs=await renderPages(f,q);for(const im of imgs)download(im.blob,im.name,"image/jpeg");message(`${imgs.length} JPG फाइलें डाउनलोड की गईं।`);return}
+else if(id==="text"||id==="pdfword"){const doc=await pdfjsLib.getDocument({data:await bytes(f)}).promise;let text="";for(let i=1;i<=doc.numPages;i++){const p=await doc.getPage(i),c=await p.getTextContent();text+=`\n\n--- Page ${i} ---\n`+c.items.map(x=>x.str).join(" ")}if(id==="text")download(new Blob([text],{type:"text/plain;charset=utf-8"}),"pdf-text.txt","text/plain");else{if(!window.docx)throw Error("DOCX लाइब्रेरी लोड नहीं हुई। इंटरनेट कनेक्शन जाँचें।");const {Document,Packer,Paragraph}=docx;const d=new Document({sections:[{children:text.split("\n").map(line=>new Paragraph(line))}]});download(await Packer.toBlob(d),"pdf-text.docx")} }
+else if(id==="numbers"||id==="watermark"){const src=await loadPdf(f),font=await src.embedFont(StandardFonts.Helvetica),pages=src.getPages();pages.forEach((p,i)=>{const {width,height}=p.getSize();if(id==="numbers"){const n=String(Number($("#start").value||1)+i);p.drawText(n,{x:width/2-5,y:18,size:10,font,color:rgb(.35,.35,.35)})}else{const txt=$("#watermark").value||"CONFIDENTIAL";p.drawText(txt,{x:width*.18,y:height*.48,size:28,font,color:rgb(.75,.2,.2),opacity:.28,rotate:degrees(35)})}});download(await src.save(),id==="numbers"?"numbered.pdf":"watermarked.pdf")}
+else if(id==="meta"){const src=await loadPdf(f);const info={pages:src.getPageCount(),title:src.getTitle()||"—",author:src.getAuthor()||"—",subject:src.getSubject()||"—",creator:src.getCreator()||"—",producer:src.getProducer()||"—",created:src.getCreationDate()?.toString()||"—"};form.insertAdjacentHTML("beforeend",`<pre class="hint">${Object.entries(info).map(([k,v])=>`${k}: ${v}`).join("\n")}</pre>`);message("PDF जानकारी नीचे दिखाई गई है।");return}
+else if(id==="wordpdf"){if(!window.mammoth||!window.jspdf)throw Error("DOCX/PDF लाइब्रेरी लोड नहीं हुई। इंटरनेट जाँचें।");const result=await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()});const {jsPDF}=window.jspdf;const pdf=new jsPDF();const lines=pdf.splitTextToSize(result.value||"No text found",180);let y=15;for(const line of lines){if(y>280){pdf.addPage();y=15}pdf.text(line,15,y);y+=7}pdf.save("word-to-pdf.pdf");}
+message("हो गया! डाउनलोड शुरू हो गया।");
+}
